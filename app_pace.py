@@ -70,7 +70,7 @@ st.title("🏃 Calculadora de Pace")
 
 abas = st.tabs(["📏 Calcular Pace", "⚡ Converter Pace para km/h"])
 
-# --- ABA 1: Calcular Pace ---
+# --- ABA 1: Calcular Pace + Velocidade ---
 with abas[0]:
     st.subheader("Informe os dados do seu treino")
 
@@ -84,7 +84,14 @@ with abas[0]:
             minutos = pace_segundos // 60
             segundos = pace_segundos % 60
             pace_formatado = f"{minutos:02d}:{segundos:02d} min/km"
-            st.markdown(f'<div class="resultado">{pace_formatado}</div>', unsafe_allow_html=True)
+            km_h = round(3600 / pace_segundos, 2)
+            
+            st.markdown(f'''
+                <div class="resultado">
+                    Pace: {pace_formatado}<br>
+                    Velocidade: {km_h} km/h
+                </div>
+            ''', unsafe_allow_html=True)
         else:
             st.warning("Por favor, preencha todos os campos corretamente.")
 
