@@ -4,30 +4,46 @@ st.set_page_config(page_title="Calculadora de Pace", layout="centered")
 
 st.markdown("""
     <style>
-        .big-font {
-            font-size: 24px !important;
-            font-weight: bold;
-        }
-        .stTabs [role="tab"] {
-            background-color: #f0f2f6;
-            border-radius: 10px 10px 0 0;
-            padding: 12px;
-            font-size: 18px;
-        }
-        .stTabs [role="tab"][aria-selected="true"] {
-            background-color: #ffffff;
-            color: gray;
-        }
-         .stButton button {
+        /* Estilo base do botão */
+        .stButton button {
             background-color: #0066cc;
-            color: gray;
-            padding: 0.6em 1.2em;
+            color: white !important;
+            padding: 0.6em 1.5em;
             font-size: 18px;
             border-radius: 8px;
             font-weight: 600;
+            border: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+
+        /* Hover do botão */
         .stButton button:hover {
-            background-color: #005bb5;
+            background-color: #0052a3;
+            color: white !important;
+        }
+
+        /* Responsividade para fontes pequenas */
+        @media (max-width: 600px) {
+            .stButton button {
+                font-size: 16px;
+                padding: 0.5em 1em;
+            }
+        }
+
+        /* Estilo de título */
+        .main h1 {
+            font-size: 2em;
+            font-weight: bold;
+            color: #003366;
+        }
+
+        /* Estilo dos inputs */
+        input {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 0.5em;
+            font-size: 16px;
         }
     </style>
 """, unsafe_allow_html=True)
