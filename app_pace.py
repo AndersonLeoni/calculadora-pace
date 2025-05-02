@@ -4,57 +4,54 @@ import streamlit as st
 st.markdown("""
     <style>
         /* RESET e mobile first */
-        html, body, [class*="css"]  {
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 16px;
-            color: #222;
+       html, body, [class*="css"]  {
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 18px; /* Aumentado de 16px para 18px no mobile */
+        color: #222;
+    }
+
+    .stButton button {
+        width: 100%;
+        background-color: #0066cc;
+        color: white !important;
+        padding: 1em;
+        font-size: 1.1rem; /* texto maior no botão */
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .stButton button:hover {
+        background-color: #0052a3;
+        color: white !important;
+    }
+
+    .stTextInput > div > div > input {
+        padding: 0.75em;
+        border-radius: 6px;
+        font-size: 1.1rem;
+    }
+
+    .big-font {
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: #003366;
+        margin-bottom: 1rem;
+    }
+
+    @media (min-width: 768px) {
+        html, body, [class*="css"] {
+            font-size: 17px; /* volta para tamanho padrão em telas maiores */
         }
 
         .stButton button {
-            width: 100%;
-            background-color: #0066cc;
-            color: white !important;
-            padding: 0.75em 1em;
-            font-size: 1rem;
-            border-radius: 8px;
-            font-weight: 600;
-            border: none;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 18px;
+            width: auto;
+            padding: 0.75em 2em;
         }
-
-        .stButton button:hover {
-            background-color: #0052a3;
-            color: white !important;
-        }
-
-        input {
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            padding: 0.5em;
-            font-size: 1rem;
-            width: 100%;
-        }
-
-        .stTextInput > div > div > input {
-            padding: 0.5em;
-            border-radius: 6px;
-        }
-
-        .big-font {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #003366;
-            margin-bottom: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .stButton button {
-                font-size: 18px;
-                width: auto;
-                padding: 0.75em 2em;
-            }
-        }
+    }
     </style>
 """, unsafe_allow_html=True)
 
