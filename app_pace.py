@@ -4,10 +4,11 @@ import streamlit as st
 st.markdown("""
     <style>
         /* RESET e mobile first */
-       html, body, [class*="css"]  {
+      html, body, [class*="css"]  {
         font-family: 'Segoe UI', sans-serif;
-        font-size: 18px; /* Aumentado de 16px para 18px no mobile */
+        font-size: 18px;
         color: #222;
+        background-color: #f5f5f5;
     }
 
     .stButton button {
@@ -15,7 +16,7 @@ st.markdown("""
         background-color: #0066cc;
         color: white !important;
         padding: 1em;
-        font-size: 1.1rem; /* texto maior no botão */
+        font-size: 1.1rem;
         border-radius: 8px;
         font-weight: 600;
         border: none;
@@ -34,22 +35,33 @@ st.markdown("""
         font-size: 1.1rem;
     }
 
-    .big-font {
-        font-size: 2.2rem;
+    /* Destacar o resultado */
+    .resultado {
+        background-color: #003366;
+        color: #ffffff;
+        font-size: 2.4rem;
         font-weight: bold;
-        color: #003366;
-        margin-bottom: 1rem;
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     @media (min-width: 768px) {
         html, body, [class*="css"] {
-            font-size: 17px; /* volta para tamanho padrão em telas maiores */
+            font-size: 17px;
         }
 
         .stButton button {
             font-size: 18px;
             width: auto;
             padding: 0.75em 2em;
+        }
+
+        .resultado {
+            font-size: 2rem;
+            padding: 1rem;
         }
     }
     </style>
