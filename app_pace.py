@@ -16,7 +16,7 @@ st.markdown("""
         }
         .stTabs [role="tab"][aria-selected="true"] {
             background-color: #ffffff;
-            color: #262730;
+            color: #gray;
         }
          .stButton button {
             background-color: #0066cc;
