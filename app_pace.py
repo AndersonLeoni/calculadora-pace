@@ -18,6 +18,17 @@ st.markdown("""
             background-color: #ffffff;
             color: #262730;
         }
+         .stButton button {
+            background-color: #0066cc;
+            color: white;
+            padding: 0.6em 1.2em;
+            font-size: 18px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .stButton button:hover {
+            background-color: #005bb5;
+        }
     </style>
 """, unsafe_allow_html=True)
 
