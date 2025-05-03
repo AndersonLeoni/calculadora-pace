@@ -37,10 +37,10 @@ st.markdown("""
         .resultado {
             background-color: #003366;
             color: #ffffff;
-            font-size: 2.4rem;
+            font-size: 2.2rem;
             font-weight: bold;
             text-align: center;
-            padding: 1.5rem;
+            padding: 1.4rem;
             border-radius: 10px;
             margin-top: 1.5rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -85,11 +85,11 @@ with abas[0]:
             segundos = pace_segundos % 60
             pace_formatado = f"{minutos:02d}:{segundos:02d} min/km"
             km_h = round(3600 / pace_segundos, 2)
-            
+
             st.markdown(f'''
                 <div class="resultado">
-                    Pace: {pace_formatado}<br>
-                    Velocidade: {km_h} km/h
+                    🕒 <strong>Pace:</strong> {pace_formatado}<br>
+                    ⚡ <strong>Velocidade:</strong> {km_h} km/h
                 </div>
             ''', unsafe_allow_html=True)
         else:
@@ -109,6 +109,10 @@ with abas[1]:
         total_min = min_pace + seg_pace / 60
         if total_min > 0:
             km_h = round(60 / total_min, 2)
-            st.markdown(f'<div class="resultado">{km_h} km/h</div>', unsafe_allow_html=True)
+            st.markdown(f'''
+                <div class="resultado">
+                    ⚡ <strong>Velocidade:</strong> {km_h} km/h
+                </div>
+            ''', unsafe_allow_html=True)
         else:
             st.warning("Informe um pace válido.")
