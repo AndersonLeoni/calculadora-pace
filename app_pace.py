@@ -43,7 +43,7 @@ if aba == "📏 Calcular Pace":
     distancia = st.number_input("Distância (km)", min_value=0.1, step=0.1)
     tempo = st.time_input("Tempo total (hh:mm:ss)")
 
-   if st.button("Calcular Pace"):
+if st.button("Calcular Pace"):
     total_minutos = tempo.hour * 60 + tempo.minute + tempo.second / 60
     pace = total_minutos / distancia
     minutos = int(pace)
