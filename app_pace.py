@@ -1,118 +1,90 @@
 import streamlit as st
 
-# ----- CSS MODERNO + MOBILE FIRST -----
+st.set_page_config(page_title="Calculadora de Pace", layout="centered")
+
 st.markdown("""
     <style>
-        html, body, [class*="css"]  {
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 18px;
-            color: #222;
-            background-color: #f5f5f5;
+        body {
+            background-color: #0e1117;
+            color: white;
         }
-
-        .stButton button {
-            width: 100%;
-            background-color: #0066cc;
-            color: white !important;
-            padding: 1em;
-            font-size: 1.1rem;
-            border-radius: 8px;
-            font-weight: 600;
-            border: none;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .stButton button:hover {
-            background-color: #0052a3;
-            color: white !important;
-        }
-
-        .stTextInput > div > div > input {
-            padding: 0.75em;
-            border-radius: 6px;
-            font-size: 1.1rem;
-        }
-
         .resultado {
-            background-color: #003366;
-            color: #ffffff;
-            font-size: 2.2rem;
-            font-weight: bold;
+            background-color: #1e1e1e;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            font-size: 1.3rem;
             text-align: center;
-            padding: 1.4rem;
-            border-radius: 10px;
-            margin-top: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-
-        @media (min-width: 768px) {
-            html, body, [class*="css"] {
-                font-size: 17px;
-            }
-
-            .stButton button {
-                font-size: 18px;
-                width: auto;
-                padding: 0.75em 2em;
-            }
-
+        input, .stButton>button {
+            font-size: 1.1rem !important;
+        }
+        @media screen and (max-width: 768px) {
             .resultado {
-                font-size: 2rem;
-                padding: 1rem;
+                font-size: 1.5rem;
+            }
+            input, .stButton>button {
+                font-size: 1.2rem !important;
             }
         }
     </style>
 """, unsafe_allow_html=True)
 
-# ----- APP -----
-st.title("🏃 Calculadora de Pace")
+st.title("🏃 Calculadora de Pace e Velocidade")
 
-abas = st.tabs(["📏 Calcular Pace", "⚡ Converter Pace para km/h"])
+aba = st.radio("Escolha uma opção:", ["📏 Calcular Pace", "⚡ Converter Pace para km/h"], horizontal=True)
 
-# --- ABA 1: Calcular Pace + Velocidade ---
-with abas[0]:
-    st.subheader("Informe os dados do seu treino")
+# Função para converter pace para km/h
+def pace_para_kmh(minutos, segundos):
+    total_minutos = minutos + segundos / 60
+    return round(60 / total_minutos, 2)
 
-    tempo = st.time_input("Tempo total", value=None)
-    distancia = st.number_input("Distância (em km)", min_value=0.01, format="%.2f")
+if aba == "📏 Calcular Pace":
+    distancia = st.number_input("Distância (km)", min_value=0.1, step=0.1)
+    tempo = st.time_input("Tempo total (hh:mm:ss)")
 
     if st.button("Calcular Pace"):
-        if tempo and distancia > 0:
-            segundos_totais = tempo.hour * 3600 + tempo.minute * 60 + tempo.second
-            pace_segundos = int(segundos_totais / distancia)
-            minutos = pace_segundos // 60
-            segundos = pace_segundos % 60
-            pace_formatado = f"{minutos:02d}:{segundos:02d} min/km"
-            km_h = round(3600 / pace_segundos, 2)
+        total_minutos = tempo.hour * 60 + tempo.minute + tempo.second / 60
+        pace = total_minutos / distancia
+        minutos = int(pace)
+        segundos = int((pace - minutos) * 60)
+        pace_formatado = f"{minutos:02d}:{segundos:02d} min/km"
+        km_h = round(60 / pace, 2)
 
-            st.markdown(f'''
-                <div class="resultado">
-                    🕒 <strong>Pace:</strong> {pace_formatado}<br>
-                    ⚡ <strong>Velocidade:</strong> {km_h} km/h
+        st.markdown(f'''
+            <div class="resultado">
+                <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M12 8a1 1 0 0 1 1 1v3.586l1.707 1.707a1 1 0 0 1-1.414 1.414l-2-2A1 1 0 0 1 11 13V9a1 1 0 0 1 1-1z"/>
+                        <path fill-rule="evenodd" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/>
+                    </svg>
+                    <strong>Pace:</strong> {pace_formatado}
                 </div>
-            ''', unsafe_allow_html=True)
-        else:
-            st.warning("Por favor, preencha todos os campos corretamente.")
-
-# --- ABA 2: Converter Pace para km/h ---
-with abas[1]:
-    st.subheader("Digite o pace (min/km) para converter em km/h")
-
-    col1, col2 = st.columns(2)
-    with col1:
-        min_pace = st.number_input("Minutos", min_value=0, step=1)
-    with col2:
-        seg_pace = st.number_input("Segundos", min_value=0, max_value=59, step=1)
-
-    if st.button("Converter para km/h"):
-        total_min = min_pace + seg_pace / 60
-        if total_min > 0:
-            km_h = round(60 / total_min, 2)
-            st.markdown(f'''
-                <div class="resultado">
-                    ⚡ <strong>Velocidade:</strong> {km_h} km/h
+                <div style="display: flex; align-items: center; gap: 10px; justify-content: center; margin-top: 10px;">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M13 3a1 1 0 0 1 1 1v3.055a7.001 7.001 0 0 1 5.44 8.385 1 1 0 0 1-1.944-.43A5.002 5.002 0 0 0 14 8.127V12a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1z"/>
+                        <path d="M6 20a1 1 0 0 1-1-1c0-2.761 4.03-5 9-5s9 2.239 9 5a1 1 0 0 1-1 1H6z"/>
+                    </svg>
+                    <strong>Velocidade:</strong> {km_h} km/h
                 </div>
-            ''', unsafe_allow_html=True)
-        else:
-            st.warning("Informe um pace válido.")
+            </div>
+        ''', unsafe_allow_html=True)
+
+elif aba == "⚡ Converter Pace para km/h":
+    minutos = st.number_input("Minutos por km", min_value=0, step=1)
+    segundos = st.number_input("Segundos por km", min_value=0, max_value=59, step=1)
+
+    if st.button("Converter"):
+        km_h = pace_para_kmh(minutos, segundos)
+
+        st.markdown(f'''
+            <div class="resultado">
+                <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M13 3a1 1 0 0 1 1 1v3.055a7.001 7.001 0 0 1 5.44 8.385 1 1 0 0 1-1.944-.43A5.002 5.002 0 0 0 14 8.127V12a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1z"/>
+                        <path d="M6 20a1 1 0 0 1-1-1c0-2.761 4.03-5 9-5s9 2.239 9 5a1 1 0 0 1-1 1H6z"/>
+                    </svg>
+                    <strong>Velocidade:</strong> {km_h} km/h
+                </div>
+            </div>
+        ''', unsafe_allow_html=True)
