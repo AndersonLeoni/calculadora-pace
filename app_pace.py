@@ -1,127 +1,76 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, time
+from datetime import timedelta
 
-# --- Estilos personalizados ---
-st.markdown("""
-<style>
-    .titulo {
-        text-align: center;
-        font-size: 2em;
-        font-weight: bold;
-        color: #4CAF50;
-    }
-    .descricao {
-        text-align: center;
-        font-size: 1.1em;
-        margin-bottom: 20px;
-    }
-    .resultado {
-        background-color: #2e7d32;
-        color: white;
-        padding: 15px;
-        border-radius: 10px;
-        margin-top: 20px;
-        font-size: 1.3em;
-        text-align: center;
-    }
-    .stButton > button {
-        background-color: #4CAF50;
-        color: white;
-        font-weight: bold;
-        border-radius: 8px;
-        padding: 10px 20px;
-        margin-top: 10px;
-    }
-</style>
-""", unsafe_allow_html=True)
+st.set_page_config(page_title="Calculadora de Pace", layout="centered")
 
-# --- Título e descrição ---
-st.markdown('<div class="titulo">Calculadora de Pace</div>', unsafe_allow_html=True)
-st.markdown('<div class="descricao">Descubra seu pace médio por quilômetro a partir da distância e tempo total.</div>', unsafe_allow_html=True)
+st.title("🏃 Calculadora de Pace")
+st.markdown("Descubra seu pace médio por quilômetro a partir da distância e tempo total.")
 
-# --- Estados globais ---
-if "mostrar_parciais" not in st.session_state:
-    st.session_state.mostrar_parciais = False
+# Função para formatar tempo inserido (ex: 123 -> 00:01:23 ou 930 -> 00:09:30)
+def formatar_tempo(entrada):
+    entrada = ''.join(filter(str.isdigit, entrada))[:6]  # Limita a 6 dígitos
+    entrada = entrada.zfill(6)
+    horas = entrada[:2]
+    minutos = entrada[2:4]
+    segundos = entrada[4:6]
+    return f"{horas}:{minutos}:{segundos}"
 
-# --- Tabs ---
-aba_calculo, aba_conversao = st.tabs(["🏃‍♂️ Calcular Pace", "🔁 Conversão de Pace"])
+# Entradas
+col1, col2 = st.columns(2)
+with col1:
+    distancia = st.number_input("Distância percorrida (km)", min_value=0.1, step=0.1, format="%.2f")
 
-# ---------------------------------
-# ABA 1: Calcular Pace
-# ---------------------------------
-with aba_calculo:
-    distancia = st.number_input("📏 Distância percorrida (km)", min_value=0.0, step=0.1, format="%.2f")
+with col2:
+    tempo_input = st.text_input("Tempo total (hhmmss)", value="0030")
+    tempo_formatado = formatar_tempo(tempo_input)
+    st.text(f"Tempo formatado: {tempo_formatado}")
 
-    tempo_digitado = st.text_input("⏳ Tempo total (hhmmss ou mmss)", value="003000", help="Digite o tempo como hhmmss ou mmss (ex: 003000 para 00:30:00 ou 0030 para 00:30)")
+# Calcular pace
+if st.button("✅ Calcular Pace"):
+    h, m, s = map(int, tempo_formatado.split(":"))
+    tempo_total_seg = h * 3600 + m * 60 + s
 
-    # Parse do tempo
-    def converter_tempo(texto):
-        try:
-            texto = texto.strip().zfill(6)  # Preenche com zeros à esquerda
-            h, m, s = int(texto[:2]), int(texto[2:4]), int(texto[4:6])
-            return time(h, m, s)
-        except:
-            return None
+    if distancia == 0:
+        st.error("Distância deve ser maior que zero.")
+    elif tempo_total_seg == 0:
+        st.error("Tempo total deve ser maior que zero.")
+    else:
+        pace_seg = tempo_total_seg / distancia
+        pace_min = int(pace_seg // 60)
+        pace_sec = int(pace_seg % 60)
+        velocidade = (distancia / tempo_total_seg) * 3600
 
-    tempo = converter_tempo(tempo_digitado)
+        st.success(f"🕒 **Pace:** {pace_min:02d}:{pace_sec:02d} min/km")
+        st.success(f"🚴‍♂️ **Velocidade:** {velocidade:.1f} km/h")
 
-    if st.button("Calcular Pace"):
-        if not tempo:
-            st.error("Formato de tempo inválido. Use hhmmss ou mmss.")
-        elif distancia <= 0:
-            st.warning("Por favor, insira uma distância maior que zero.")
-        else:
-            total_min = tempo.hour * 60 + tempo.minute + tempo.second / 60
-            pace = total_min / distancia
-            minutos = int(pace)
-            segundos = int((pace - minutos) * 60)
-            pace_formatado = f"{minutos:02d}:{segundos:02d} min/km"
-            velocidade = round(60 / pace, 2)
+        # Exibir/ocultar parciais
+        if 'mostrar_parciais' not in st.session_state:
+            st.session_state.mostrar_parciais = False
 
-            # Mostrar resultado
-            st.markdown(f'''
-                <div class="resultado">
-                    ⏱️ <strong>Pace:</strong> {pace_formatado} <br>
-                    🚀 <strong>Velocidade:</strong> {velocidade} km/h
-                </div>
-            ''', unsafe_allow_html=True)
+        if st.button("👟 Ver/Ocultar Parciais por KM"):
+            st.session_state.mostrar_parciais = not st.session_state.mostrar_parciais
 
-            # Botão para exibir/ocultar splits
-            if st.button("👟 Ver/Ocultar Parciais por KM"):
-                st.session_state.mostrar_parciais = not st.session_state.mostrar_parciais
+        if st.session_state.mostrar_parciais:
+            # Gerar splits
+            splits = []
+            for km in range(1, int(distancia)+1):
+                parcial_seg = pace_seg * km
+                parcial_tempo = str(timedelta(seconds=int(parcial_seg)))
+                vel_km = 3600 / pace_seg
+                splits.append({"KM": km, "Tempo Parcial": parcial_tempo, "Velocidade (km/h)": f"{vel_km:.1f}"})
 
-            if st.session_state.mostrar_parciais:
-                st.markdown("### 📊 Tabela de Splits por KM")
+            df = pd.DataFrame(splits)
+            st.markdown("### 📊 Splits por KM")
+            st.dataframe(df, use_container_width=True)
 
-                data = []
-                for km in range(1, int(distancia) + 1):
-                    parcial_min = pace * km
-                    min_parcial = int(parcial_min)
-                    seg_parcial = int((parcial_min - min_parcial) * 60)
-                    vel_km = round(60 / (parcial_min / km), 2)
-                    data.append({
-                        "KM": km,
-                        "Tempo Parcial": f"{min_parcial:02d}:{seg_parcial:02d}",
-                        "Velocidade (km/h)": vel_km
-                    })
-
-                df_parciais = pd.DataFrame(data)
-                st.dataframe(df_parciais, use_container_width=True)
-
-# ---------------------------------
-# ABA 2: Conversão de Pace
-# ---------------------------------
-with aba_conversao:
-    st.markdown("### 🎯 Conversão de Pace para Velocidade")
-
-    pace_min = st.number_input("Minutos por KM", min_value=0, max_value=59, step=1)
-    pace_sec = st.number_input("Segundos por KM", min_value=0, max_value=59, step=1)
-
-    if st.button("Converter Pace para km/h"):
-        total_min = pace_min + pace_sec / 60
-        if total_min == 0:
-            st.warning("O pace não pode ser zero.")
-        else:
-            velocidade = round(60 / total_min, 2)
-            st.success(f"🚀 Velocidade equivalente: {velocidade} km/h")
+# Conversor de Pace
+with st.expander("🧮 Converter Pace para Velocidade"):
+    pace_convertido = st.text_input("Digite o pace (min/km)", value="06:00")
+    try:
+        min_pace, sec_pace = map(int, pace_convertido.split(":"))
+        total_seg = min_pace * 60 + sec_pace
+        velocidade_calc = 3600 / total_seg
+        st.info(f"🚴 Velocidade correspondente: **{velocidade_calc:.2f} km/h**")
+    except:
+        st.warning("Digite no formato mm:ss, por exemplo: 05:30")
