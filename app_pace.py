@@ -33,6 +33,14 @@ st.markdown("""
         font-weight: bold;
         border-radius: 8px;
         padding: 10px 20px;
+        margin-top: 10px;
+    }
+
+    .parcial {
+        background-color: #f0f0f0;
+        padding: 8px 15px;
+        border-radius: 8px;
+        margin-bottom: 5px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -41,19 +49,16 @@ st.markdown("""
 st.markdown('<div class="titulo-principal">Calculadora de Pace</div>', unsafe_allow_html=True)
 st.markdown('<div class="descricao">Descubra seu pace médio por quilômetro a partir da distância e tempo total.</div>', unsafe_allow_html=True)
 
-# Inicializar variáveis de estado
+# Estados iniciais
 if "resultado_exibido" not in st.session_state:
     st.session_state.resultado_exibido = False
 
 if "mostrar_parciais" not in st.session_state:
     st.session_state.mostrar_parciais = False
 
-# Entradas
-col1, col2 = st.columns(2)
-with col1:
-    distancia = st.number_input("Distância percorrida (km)", min_value=0.0, step=0.1, format="%.2f")
-with col2:
-    tempo = st.time_input("Tempo total (hh:mm:ss)", value=time(0, 0, 0))
+# Entradas (agora em linha única)
+distancia = st.number_input("📏 Distância percorrida (km)", min_value=0.0, step=0.1, format="%.2f")
+tempo = st.time_input("⏳ Tempo total (hh:mm:ss)", value=time(0, 0, 0))
 
 # Botão calcular
 if st.button("Calcular Pace"):
@@ -71,23 +76,25 @@ if st.button("Calcular Pace"):
         st.session_state.distancia = distancia
         st.session_state.resultado_exibido = True
 
-# Mostrar resultado
+# Resultado principal
 if st.session_state.resultado_exibido:
     st.markdown(f'''
         <div class="resultado">
-            <strong>Pace:</strong> {st.session_state.pace_formatado} <br>
-            <strong>Velocidade:</strong> {st.session_state.km_h} km/h
+            ⏱️ <strong>Pace:</strong> {st.session_state.pace_formatado} <br>
+            🚀 <strong>Velocidade:</strong> {st.session_state.km_h} km/h
         </div>
     ''', unsafe_allow_html=True)
 
-    # Botão para alternar visibilidade das parciais
+    # Botão de parciais
     if st.button("👟 Ver/Ocultar Parciais por KM"):
         st.session_state.mostrar_parciais = not st.session_state.mostrar_parciais
 
+    # Parciais
     if st.session_state.mostrar_parciais:
-        st.markdown("### 📏 Parciais por Quilômetro")
+        st.markdown("### 📊 Parciais por Quilômetro")
         for km in range(1, int(st.session_state.distancia) + 1):
             tempo_km_min = st.session_state.pace_valor * km
             min_km = int(tempo_km_min)
             seg_km = int((tempo_km_min - min_km) * 60)
-            st.write(f"KM {km:02d}: {min_km:02d}:{seg_km:02d}")
+            vel_km = round(60 / (tempo_km_min / km), 2)  # velocidade parcial
+            st.markdown(f'<div class="parcial">KM {km:02d}: ⏱️ {min_km:02d}:{seg_km:02d} | 🚀 {vel_km} km/h</div>', unsafe_allow_html=True)
