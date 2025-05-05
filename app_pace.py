@@ -46,7 +46,8 @@ if aba == "📏 Calcular Pace":
     distancia = st.number_input("Distância (km)", min_value=0.1, step=0.1)
     tempo = st.time_input("Tempo total (hh:mm:ss)", value=time(0, 30, 0))
 
-    exibir_splits = False  # variável de controle
+    if "pace_calculado" not in st.session_state:
+        st.session_state.pace_calculado = False
 
     if st.button("Calcular Pace"):
         total_minutos = tempo.hour * 60 + tempo.minute + tempo.second / 60
@@ -55,18 +56,25 @@ if aba == "📏 Calcular Pace":
         segundos = int((pace_min_km - minutos) * 60)
         velocidade = round(60 / pace_min_km, 2)
 
+        st.session_state.resultado = {
+            "pace": f"{minutos:02d}:{segundos:02d}",
+            "velocidade": velocidade,
+            "splits": calcular_splits(distancia, pace_min_km)
+        }
+        st.session_state.pace_calculado = True
+
+    if st.session_state.pace_calculado:
+        resultado = st.session_state.resultado
         st.markdown(f"""
             <div class="resultado">
-                <strong>⏱️ Pace:</strong> {minutos:02d}:{segundos:02d} min/km<br>
-                <strong>🚀 Velocidade:</strong> {velocidade} km/h
+                <strong>⏱️ Pace:</strong> {resultado["pace"]} min/km<br>
+                <strong>🚀 Velocidade:</strong> {resultado["velocidade"]} km/h
             </div>
         """, unsafe_allow_html=True)
 
-        exibir_splits = st.toggle("👟 Ver splits por km", value=True)
-
+        exibir_splits = st.toggle("👟 Ver splits por km", value=False)
         if exibir_splits:
-            dados_splits = calcular_splits(distancia, pace_min_km)
-            mostrar_tabela_splits(dados_splits, "📊 Splits por KM")
+            mostrar_tabela_splits(st.session_state.resultado["splits"], "📊 Splits por KM")
             
 elif aba == "⚡ Converter Pace":
     st.subheader("⚡ Converter Pace para Velocidade")
