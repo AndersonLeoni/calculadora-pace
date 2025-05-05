@@ -1,96 +1,107 @@
 import streamlit as st
-import re
 from datetime import time
 
 st.set_page_config(page_title="Calculadora de Pace", layout="centered")
 
+st.markdown("""
+    <style>
+        .resultado {
+            background-color: #1e1e1e;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+        .split-table {
+            margin-top: 20px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("🏃 Calculadora de Pace e Estratégia de Prova")
 
-aba = st.radio("Escolha uma opção:", ["📏 Calcular Pace", "⚡ Converter Pace para km/h", "📊 Estratégia Pace Pro"], horizontal=True)
+aba = st.radio("Escolha uma opção:", ["📏 Calcular Pace", "⚡ Converter Pace", "🧠 Estratégia Pace Pro"], horizontal=True)
 
+def calcular_splits(distancia, pace_min_km):
+    dados = []
+    for km in range(1, int(distancia) + 1):
+        total_min = pace_min_km * km
+        minutos = int(pace_min_km)
+        segundos = int((pace_min_km - minutos) * 60)
+        velocidade = round(60 / pace_min_km, 2)
+        dados.append((str(km), f"{minutos:02d}:{segundos:02d}", f"{velocidade} km/h"))
+    return dados
 
-def pace_para_kmh(minutos, segundos):
-    total_minutos = minutos + segundos / 60
-    return round(60 / total_minutos, 2)
-
-
-def tempo_input_personalizado(label):
-    tempo_bruto = st.text_input(label, value="00:30:00", max_chars=8, help="Formato: hh:mm:ss")
-    pattern = r"^(\d{1,2}):?(\d{1,2}):?(\d{1,2})$"
-    match = re.match(pattern, tempo_bruto.replace(" ", ""))
-    if match:
-        h, m, s = [int(x) for x in match.groups()]
-        return time(hour=h, minute=m, second=s)
-    else:
-        st.warning("Formato inválido. Use hh:mm:ss")
-        return time(0, 0, 0)
-
+def mostrar_tabela_splits(dados, titulo):
+    st.markdown(f"### {titulo}")
+    st.table({
+        "KM": [d[0] for d in dados],
+        "Pace": [d[1] for d in dados],
+        "Velocidade": [d[2] for d in dados]
+    })
 
 if aba == "📏 Calcular Pace":
+    st.subheader("📏 Calcular Pace")
     distancia = st.number_input("Distância (km)", min_value=0.1, step=0.1)
-    tempo = tempo_input_personalizado("Tempo total (hh:mm:ss)")
+    tempo = st.time_input("Tempo total (hh:mm:ss)", value=time(0, 30, 0))
 
-    if st.button("Calcular Pace"):
+    mostrar = st.button("Calcular Pace")
+    if mostrar:
         total_minutos = tempo.hour * 60 + tempo.minute + tempo.second / 60
-        pace = total_minutos / distancia
-        minutos = int(pace)
-        segundos = int((pace - minutos) * 60)
-        pace_formatado = f"{minutos:02d}:{segundos:02d} min/km"
-        km_h = round(60 / pace, 2)
+        pace_min_km = total_minutos / distancia
+        minutos = int(pace_min_km)
+        segundos = int((pace_min_km - minutos) * 60)
+        velocidade = round(60 / pace_min_km, 2)
 
         st.markdown(f"""
-            ### Resultado
-            - **Pace:** {pace_formatado}
-            - **Velocidade:** {km_h} km/h
-        """)
+            <div class="resultado">
+                <strong>⏱️ Pace:</strong> {minutos:02d}:{segundos:02d} min/km<br>
+                <strong>🚀 Velocidade:</strong> {velocidade} km/h
+            </div>
+        """, unsafe_allow_html=True)
 
-        if st.toggle("👟 Ver/ocultar parciais por km"):
-            st.markdown("### 📏 Parciais por quilômetro")
-            dados = []
-            for km in range(1, int(distancia) + 1):
-                tempo_km_min = pace * km
-                min_km = int(tempo_km_min)
-                seg_km = int((tempo_km_min - min_km) * 60)
-                velocidade_km = round(60 / (tempo_km_min / km), 2)
-                dados.append((f"{km} km", f"{min_km:02d}:{seg_km:02d}", f"{velocidade_km} km/h"))
-            st.table(dados)
+        if st.toggle("👟 Ver splits por km"):
+            dados_splits = calcular_splits(distancia, pace_min_km)
+            mostrar_tabela_splits(dados_splits, "📊 Splits por KM")
 
-elif aba == "⚡ Converter Pace para km/h":
-    minutos = st.number_input("Minutos por km", min_value=0, step=1)
-    segundos = st.number_input("Segundos por km", min_value=0, max_value=59, step=1)
+elif aba == "⚡ Converter Pace":
+    st.subheader("⚡ Converter Pace para Velocidade")
+    min_km = st.number_input("Minutos por km", min_value=0)
+    seg_km = st.number_input("Segundos por km", min_value=0, max_value=59)
 
     if st.button("Converter"):
-        km_h = pace_para_kmh(minutos, segundos)
+        total_min = min_km + seg_km / 60
+        kmh = round(60 / total_min, 2)
+
         st.markdown(f"""
-            ### Resultado
-            - **Velocidade:** {km_h} km/h
-        """)
+            <div class="resultado">
+                <strong>🚴 Velocidade:</strong> {kmh} km/h
+            </div>
+        """, unsafe_allow_html=True)
 
-elif aba == "📊 Estratégia Pace Pro":
-    st.subheader("🎯 Planejamento Estratégico de Prova")
+elif aba == "🧠 Estratégia Pace Pro":
+    st.subheader("🧠 Estratégia Pace Pro")
+    distancia = st.number_input("Distância da prova (km)", min_value=1)
+    tempo_estimado = st.time_input("Tempo estimado (hh:mm:ss)", value=time(1, 0, 0))
+    estrategia = st.selectbox("Escolha a estratégia:", ["Equilibrado", "Início mais leve", "Início mais forte"])
 
-    distancia_total = st.number_input("Distância da prova (km)", min_value=1, step=1, key="dist_estrategia")
-    tempo_prova = tempo_input_personalizado("Tempo estimado total (hh:mm:ss)")
-    estrategia = st.selectbox("Estratégia de prova", ["Equilibrado", "Início mais leve", "Início mais forte"])
+    if st.button("Gerar Estratégia"):
+        total_min = tempo_estimado.hour * 60 + tempo_estimado.minute + tempo_estimado.second / 60
+        pace_base = total_min / distancia
 
-    total_minutos = tempo_prova.hour * 60 + tempo_prova.minute + tempo_prova.second / 60
-    pace_medio = total_minutos / distancia_total
+        dados = []
+        for km in range(1, int(distancia) + 1):
+            ajuste = 0
+            if estrategia == "Início mais leve":
+                ajuste = 0.1 * (1 - km / distancia)
+            elif estrategia == "Início mais forte":
+                ajuste = 0.1 * (km / distancia)
 
-    variacao = 0.2  # 20% variação máxima no pace
-    pace_por_km = []
+            pace_km = pace_base + ajuste if estrategia == "Início mais leve" else pace_base - ajuste if estrategia == "Início mais forte" else pace_base
+            minutos = int(pace_km)
+            segundos = int((pace_km - minutos) * 60)
+            velocidade = round(60 / pace_km, 2)
+            dados.append((str(km), f"{minutos:02d}:{segundos:02d}", f"{velocidade} km/h"))
 
-    for km in range(1, int(distancia_total) + 1):
-        if estrategia == "Equilibrado":
-            pace_km = pace_medio
-        elif estrategia == "Início mais leve":
-            pace_km = pace_medio + variacao * ((int(distancia_total) - km) / int(distancia_total))
-        elif estrategia == "Início mais forte":
-            pace_km = pace_medio - variacao * (km / int(distancia_total))
-
-        minutos = int(pace_km)
-        segundos = int((pace_km - minutos) * 60)
-        velocidade = round(60 / pace_km, 2)
-        pace_por_km.append((f"{km} km", f"{minutos:02d}:{segundos:02d}", f"{velocidade} km/h"))
-
-    st.markdown("### 📋 Estratégia por quilômetro")
-    st.table(pace_por_km)
+        mostrar_tabela_splits(dados, "📊 Estratégia de Prova Pace Pro")
