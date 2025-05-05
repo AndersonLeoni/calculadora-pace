@@ -32,7 +32,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🏃 Calculadora de Pace e Velocidade")
+st.title("🏃 Calculadora de Pace e Estratégia de Prova")
 
 aba = st.radio("Escolha uma opção:", ["📏 Calcular Pace", "⚡ Converter Pace para km/h", "📊 Estratégia Pace Pro"], horizontal=True)
 
@@ -51,6 +51,7 @@ def tempo_input_personalizado(label):
         st.warning("Formato inválido. Use hh:mm:ss")
         return time(0, 0, 0)
 
+# === ABA 1 ===
 if aba == "📏 Calcular Pace":
     distancia = st.number_input("Distância (km)", min_value=0.1, step=0.1)
     tempo = tempo_input_personalizado("Tempo total (hh:mm:ss)")
@@ -65,12 +66,8 @@ if aba == "📏 Calcular Pace":
 
         st.markdown(f'''
             <div class="resultado">
-                <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
-                    <strong>Pace:</strong> {pace_formatado}
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px; justify-content: center; margin-top: 10px;">
-                    <strong>Velocidade:</strong> {km_h} km/h
-                </div>
+                <div><strong>Pace:</strong> {pace_formatado}</div>
+                <div style="margin-top: 10px;"><strong>Velocidade:</strong> {km_h} km/h</div>
             </div>
         ''', unsafe_allow_html=True)
 
@@ -85,6 +82,7 @@ if aba == "📏 Calcular Pace":
                 dados.append((f"{km} km", f"{min_km:02d}:{seg_km:02d}", f"{velocidade_km} km/h"))
             st.table(dados)
 
+# === ABA 2 ===
 elif aba == "⚡ Converter Pace para km/h":
     minutos = st.number_input("Minutos por km", min_value=0, step=1)
     segundos = st.number_input("Segundos por km", min_value=0, max_value=59, step=1)
@@ -94,22 +92,21 @@ elif aba == "⚡ Converter Pace para km/h":
 
         st.markdown(f'''
             <div class="resultado">
-                <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
-                    <strong>Velocidade:</strong> {km_h} km/h
-                </div>
+                <div><strong>Velocidade:</strong> {km_h} km/h</div>
             </div>
         ''', unsafe_allow_html=True)
 
+# === ABA 3 ===
 elif aba == "📊 Estratégia Pace Pro":
-    st.subheader("🎯 Planejamento de Prova com Pace Personalizado")
+    st.subheader("🎯 Planejamento Estratégico de Prova")
     
-    distancia = st.number_input("Distância da prova (km)", min_value=1, step=1)
-    pace_base = st.slider("Pace base (min/km)", 3.0, 10.0, 6.0, 0.1)
+    distancia = st.number_input("Distância da prova (km)", min_value=1, step=1, key="dist_estrategia")
+    pace_base = st.slider("Pace base (min/km)", 3.0, 10.0, 6.0, 0.1, key="pace_base")
 
-    st.markdown("### Ajuste o Pace por Km")
+    st.markdown("### ⚙️ Ajuste o Pace por Km")
     pace_por_km = []
     for km in range(1, int(distancia) + 1):
-        pace_km = st.slider(f"{km} km", min_value=pace_base - 2, max_value=pace_base + 2, value=pace_base, step=0.1)
+        pace_km = st.slider(f"{km} km", min_value=pace_base - 2, max_value=pace_base + 2, value=pace_base, step=0.1, key=f"slider_km_{km}")
         minutos = int(pace_km)
         segundos = int((pace_km - minutos) * 60)
         velocidade = round(60 / pace_km, 2)
