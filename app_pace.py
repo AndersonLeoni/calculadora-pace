@@ -93,31 +93,24 @@ elif aba == "⚡ Converter Pace":
 
 elif aba == "🏁 Pace Pro":
     st.subheader("🏁 Estratégia Pace Pro")
-    
+
     distancia_pp = st.number_input("Distância da prova (km)", min_value=1.0, step=0.1, format="%.1f")
     tempo_previsto = st.time_input("Tempo previsto para conclusão (hh:mm:ss)", value=time(1, 0, 0))
-    
-    estrategia = st.radio(
-        "Escolha a estratégia:",
-        ["🎯 Início mais leve", "🔥 Início mais forte"]
-    )
+    estrategia = st.radio("Escolha a estratégia:", ["🎯 Início mais leve", "🔥 Início mais forte"])
 
     if st.button("Gerar Estratégia Pace Pro"):
         total_minutos = tempo_previsto.hour * 60 + tempo_previsto.minute + tempo_previsto.second / 60
         pace_medio = total_minutos / distancia_pp
 
-        # Estratégia: leve no início, forte no final OU o contrário
         splits = []
-        fator = 0.03  # variação de até 3% no pace para ajustar a estratégia
+        fator = 0.03  # variação de até 3%
 
         for km in range(1, int(distancia_pp) + 1):
             ajuste = (km - 1) / (distancia_pp - 1) if distancia_pp > 1 else 0
-
             if estrategia == "🎯 Início mais leve":
                 pace_km = pace_medio * (1 + fator * (1 - ajuste))
             else:
                 pace_km = pace_medio * (1 - fator * (1 - ajuste))
-
             minutos = int(pace_km)
             segundos = int((pace_km - minutos) * 60)
             splits.append([km, f"{minutos:02d}:{segundos:02d}"])
