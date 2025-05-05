@@ -4,41 +4,15 @@ from datetime import time
 
 st.set_page_config(page_title="Calculadora de Pace", layout="centered")
 
-st.markdown("""
-    <style>
-        body {
-            background-color: #0e1117;
-            color: white;
-        }
-        .resultado {
-            background-color: #1e1e1e;
-            padding: 1rem;
-            border-radius: 12px;
-            margin-top: 1rem;
-            font-size: 1.3rem;
-            text-align: center;
-        }
-        input, .stButton>button {
-            font-size: 1.1rem !important;
-        }
-        @media screen and (max-width: 768px) {
-            .resultado {
-                font-size: 1.5rem;
-            }
-            input, .stButton>button {
-                font-size: 1.2rem !important;
-            }
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 st.title("🏃 Calculadora de Pace e Estratégia de Prova")
 
 aba = st.radio("Escolha uma opção:", ["📏 Calcular Pace", "⚡ Converter Pace para km/h", "📊 Estratégia Pace Pro"], horizontal=True)
 
+
 def pace_para_kmh(minutos, segundos):
     total_minutos = minutos + segundos / 60
     return round(60 / total_minutos, 2)
+
 
 def tempo_input_personalizado(label):
     tempo_bruto = st.text_input(label, value="00:30:00", max_chars=8, help="Formato: hh:mm:ss")
@@ -51,7 +25,7 @@ def tempo_input_personalizado(label):
         st.warning("Formato inválido. Use hh:mm:ss")
         return time(0, 0, 0)
 
-# === ABA 1 ===
+
 if aba == "📏 Calcular Pace":
     distancia = st.number_input("Distância (km)", min_value=0.1, step=0.1)
     tempo = tempo_input_personalizado("Tempo total (hh:mm:ss)")
@@ -64,12 +38,11 @@ if aba == "📏 Calcular Pace":
         pace_formatado = f"{minutos:02d}:{segundos:02d} min/km"
         km_h = round(60 / pace, 2)
 
-        st.markdown(f'''
-            <div class="resultado">
-                <div><strong>Pace:</strong> {pace_formatado}</div>
-                <div style="margin-top: 10px;"><strong>Velocidade:</strong> {km_h} km/h</div>
-            </div>
-        ''', unsafe_allow_html=True)
+        st.markdown(f"""
+            ### Resultado
+            - **Pace:** {pace_formatado}
+            - **Velocidade:** {km_h} km/h
+        """)
 
         if st.toggle("👟 Ver/ocultar parciais por km"):
             st.markdown("### 📏 Parciais por quilômetro")
@@ -82,35 +55,42 @@ if aba == "📏 Calcular Pace":
                 dados.append((f"{km} km", f"{min_km:02d}:{seg_km:02d}", f"{velocidade_km} km/h"))
             st.table(dados)
 
-# === ABA 2 ===
 elif aba == "⚡ Converter Pace para km/h":
     minutos = st.number_input("Minutos por km", min_value=0, step=1)
     segundos = st.number_input("Segundos por km", min_value=0, max_value=59, step=1)
 
     if st.button("Converter"):
         km_h = pace_para_kmh(minutos, segundos)
+        st.markdown(f"""
+            ### Resultado
+            - **Velocidade:** {km_h} km/h
+        """)
 
-        st.markdown(f'''
-            <div class="resultado">
-                <div><strong>Velocidade:</strong> {km_h} km/h</div>
-            </div>
-        ''', unsafe_allow_html=True)
-
-# === ABA 3 ===
 elif aba == "📊 Estratégia Pace Pro":
     st.subheader("🎯 Planejamento Estratégico de Prova")
-    
-    distancia = st.number_input("Distância da prova (km)", min_value=1, step=1, key="dist_estrategia")
-    pace_base = st.slider("Pace base (min/km)", 3.0, 10.0, 6.0, 0.1, key="pace_base")
 
-    st.markdown("### ⚙️ Ajuste o Pace por Km")
+    distancia_total = st.number_input("Distância da prova (km)", min_value=1, step=1, key="dist_estrategia")
+    tempo_prova = tempo_input_personalizado("Tempo estimado total (hh:mm:ss)")
+    estrategia = st.selectbox("Estratégia de prova", ["Equilibrado", "Início mais leve", "Início mais forte"])
+
+    total_minutos = tempo_prova.hour * 60 + tempo_prova.minute + tempo_prova.second / 60
+    pace_medio = total_minutos / distancia_total
+
+    variacao = 0.2  # 20% variação máxima no pace
     pace_por_km = []
-    for km in range(1, int(distancia) + 1):
-        pace_km = st.slider(f"{km} km", min_value=pace_base - 2, max_value=pace_base + 2, value=pace_base, step=0.1, key=f"slider_km_{km}")
+
+    for km in range(1, int(distancia_total) + 1):
+        if estrategia == "Equilibrado":
+            pace_km = pace_medio
+        elif estrategia == "Início mais leve":
+            pace_km = pace_medio + variacao * ((int(distancia_total) - km) / int(distancia_total))
+        elif estrategia == "Início mais forte":
+            pace_km = pace_medio - variacao * (km / int(distancia_total))
+
         minutos = int(pace_km)
         segundos = int((pace_km - minutos) * 60)
         velocidade = round(60 / pace_km, 2)
         pace_por_km.append((f"{km} km", f"{minutos:02d}:{segundos:02d}", f"{velocidade} km/h"))
 
-    st.markdown("### 📋 Tabela Estratégica")
+    st.markdown("### 📋 Estratégia por quilômetro")
     st.table(pace_por_km)
