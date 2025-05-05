@@ -91,28 +91,35 @@ elif aba == "⚡ Converter Pace":
             </div>
         """, unsafe_allow_html=True)
 
-elif aba == "🧠 Estratégia Pace Pro":
-    st.subheader("🧠 Estratégia Pace Pro")
-    distancia = st.number_input("Distância da prova (km)", min_value=1)
-    tempo_estimado = st.time_input("Tempo estimado (hh:mm:ss)", value=time(1, 0, 0))
-    estrategia = st.selectbox("Escolha a estratégia:", ["Equilibrado", "Início mais leve", "Início mais forte"])
+elif aba == "🏁 Pace Pro":
+    st.subheader("🏁 Estratégia Pace Pro")
+    
+    distancia_pp = st.number_input("Distância da prova (km)", min_value=1.0, step=0.1, format="%.1f")
+    tempo_previsto = st.time_input("Tempo previsto para conclusão (hh:mm:ss)", value=time(1, 0, 0))
+    
+    estrategia = st.radio(
+        "Escolha a estratégia:",
+        ["🎯 Início mais leve", "🔥 Início mais forte"]
+    )
 
-    if st.button("Gerar Estratégia"):
-        total_min = tempo_estimado.hour * 60 + tempo_estimado.minute + tempo_estimado.second / 60
-        pace_base = total_min / distancia
+    if st.button("Gerar Estratégia Pace Pro"):
+        total_minutos = tempo_previsto.hour * 60 + tempo_previsto.minute + tempo_previsto.second / 60
+        pace_medio = total_minutos / distancia_pp
 
-        dados = []
-        for km in range(1, int(distancia) + 1):
-            ajuste = 0
-            if estrategia == "Início mais leve":
-                ajuste = 0.1 * (1 - km / distancia)
-            elif estrategia == "Início mais forte":
-                ajuste = 0.1 * (km / distancia)
+        # Estratégia: leve no início, forte no final OU o contrário
+        splits = []
+        fator = 0.03  # variação de até 3% no pace para ajustar a estratégia
 
-            pace_km = pace_base + ajuste if estrategia == "Início mais leve" else pace_base - ajuste if estrategia == "Início mais forte" else pace_base
+        for km in range(1, int(distancia_pp) + 1):
+            ajuste = (km - 1) / (distancia_pp - 1) if distancia_pp > 1 else 0
+
+            if estrategia == "🎯 Início mais leve":
+                pace_km = pace_medio * (1 + fator * (1 - ajuste))
+            else:
+                pace_km = pace_medio * (1 - fator * (1 - ajuste))
+
             minutos = int(pace_km)
             segundos = int((pace_km - minutos) * 60)
-            velocidade = round(60 / pace_km, 2)
-            dados.append((str(km), f"{minutos:02d}:{segundos:02d}", f"{velocidade} km/h"))
+            splits.append([km, f"{minutos:02d}:{segundos:02d}"])
 
-        mostrar_tabela_splits(dados, "📊 Estratégia de Prova Pace Pro")
+        mostrar_tabela_splits(splits, "📈 Estratégia Pace Pro")
