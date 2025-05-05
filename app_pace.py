@@ -46,8 +46,9 @@ if aba == "📏 Calcular Pace":
     distancia = st.number_input("Distância (km)", min_value=0.1, step=0.1)
     tempo = st.time_input("Tempo total (hh:mm:ss)", value=time(0, 30, 0))
 
-    mostrar = st.button("Calcular Pace")
-    if mostrar:
+    exibir_splits = False  # variável de controle
+
+    if st.button("Calcular Pace"):
         total_minutos = tempo.hour * 60 + tempo.minute + tempo.second / 60
         pace_min_km = total_minutos / distancia
         minutos = int(pace_min_km)
@@ -61,10 +62,12 @@ if aba == "📏 Calcular Pace":
             </div>
         """, unsafe_allow_html=True)
 
-        if st.toggle("👟 Ver splits por km"):
+        exibir_splits = st.toggle("👟 Ver splits por km", value=True)
+
+        if exibir_splits:
             dados_splits = calcular_splits(distancia, pace_min_km)
             mostrar_tabela_splits(dados_splits, "📊 Splits por KM")
-
+            
 elif aba == "⚡ Converter Pace":
     st.subheader("⚡ Converter Pace para Velocidade")
     min_km = st.number_input("Minutos por km", min_value=0)
