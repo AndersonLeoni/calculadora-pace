@@ -98,18 +98,20 @@ elif aba == "🏁 Pace Pro":
     tempo_previsto = st.time_input("Tempo previsto para conclusão (hh:mm:ss)", value=time(1, 0, 0))
     estrategia = st.radio("Escolha a estratégia:", ["🎯 Início mais leve", "🔥 Início mais forte"])
 
-    if st.button("Gerar Estratégia Pace Pro"):
+    gerar = st.button("Gerar Estratégia Pace Pro")
+
+    if gerar:
         total_minutos = tempo_previsto.hour * 60 + tempo_previsto.minute + tempo_previsto.second / 60
         pace_medio = total_minutos / distancia_pp
 
         splits = []
-        fator = 0.03  # variação de até 3%
+        fator = 0.03  # variação máxima de 3% no pace
 
         for km in range(1, int(distancia_pp) + 1):
             ajuste = (km - 1) / (distancia_pp - 1) if distancia_pp > 1 else 0
             if estrategia == "🎯 Início mais leve":
                 pace_km = pace_medio * (1 + fator * (1 - ajuste))
-            else:
+            else:  # início mais forte
                 pace_km = pace_medio * (1 - fator * (1 - ajuste))
             minutos = int(pace_km)
             segundos = int((pace_km - minutos) * 60)
