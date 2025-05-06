@@ -21,7 +21,7 @@ st.markdown("""
 
 st.title("🏃 Calculadora de Pace e Estratégia de Prova")
 
-aba = st.radio("Escolha uma opção:", ["📏 Calcular Pace", "⚡ Converter Pace", "🧠 Estratégia Pace Pro"], horizontal=True)
+aba = st.radio("Escolha uma opção:", ["📏 Calcular Pace", "⚡ Converter Pace", "🏁 Pace Pro"], horizontal=True)
 
 def calcular_splits(distancia, pace_min_km):
     dados = []
@@ -75,7 +75,7 @@ if aba == "📏 Calcular Pace":
         exibir_splits = st.toggle("👟 Ver splits por km", value=False)
         if exibir_splits:
             mostrar_tabela_splits(st.session_state.resultado["splits"], "📊 Splits por KM")
-            
+
 elif aba == "⚡ Converter Pace":
     st.subheader("⚡ Converter Pace para Velocidade")
     min_km = st.number_input("Minutos por km", min_value=0)
