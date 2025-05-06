@@ -113,8 +113,10 @@ elif aba == "🏁 Pace Pro":
                 pace_km = pace_medio * (1 + fator * (1 - ajuste))
             else:  # início mais forte
                 pace_km = pace_medio * (1 - fator * (1 - ajuste))
+
             minutos = int(pace_km)
             segundos = int((pace_km - minutos) * 60)
-            splits.append([km, f"{minutos:02d}:{segundos:02d}"])
+            velocidade = round(60 / pace_km, 2)
+            splits.append((str(km), f"{minutos:02d}:{segundos:02d}", f"{velocidade} km/h"))
 
         mostrar_tabela_splits(splits, "📈 Estratégia Pace Pro")
